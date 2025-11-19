@@ -1,0 +1,89 @@
+---
+description: Project rules and setup guide for RAG application
+globs: *
+alwaysApply: true
+---
+
+# Project: RAG Application (Python, LangChain, OpenAI)
+
+## 1. Project Overview
+This project is a Retrieval-Augmented Generation (RAG) system built with Python, LangChain, and OpenAI.
+It processes PDF documents, indexes them into a Vector Database (ChromaDB), and allows users to query the information via an LLM.
+
+## 2. Directory Structure
+- `document/`: Stores input PDF files for indexing.
+- `chromedb/`: Directory for ChromaDB Docker configuration or persistent storage.
+- `src/`: Source code.
+- `docs/`: Documentation.
+- `helper/`: Helper scripts.
+
+## 3. Tech Stack
+- **Language**: Python
+- **Orchestration**: LangChain
+- **LLM**: OpenAI (GPT models)
+- **Vector Database**: ChromaDB (running via Docker)
+- **PDF Parsing**: PyPDF2
+- **Chunking**: RecursiveCharacterTextSplitter (LangChain)
+
+## 4. Workflow Implementation Details
+
+### Phase 1: Indexing Pipeline
+The goal is to prepare data for retrieval.
+1.  **Load Data**:
+    - Read PDF files from the `document/` folder.
+    - Use `PyPDF2` or LangChain's PDF loaders.
+2.  **Chunking**:
+    - Use `RecursiveCharacterTextSplitter` to split text into manageable chunks.
+    - Configure appropriate `chunk_size` (e.g., 1000) and `chunk_overlap` (e.g., 200).
+3.  **Embedding & Storage**:
+    - Convert text chunks into vectors using OpenAI Embeddings.
+    - Store vectors in ChromaDB.
+
+### Phase 2: Querying Pipeline (Reference: docs/0-overview.md)
+The goal is to retrieve relevant context and answer user questions.
+1.  **Receive Query**: Accept text input from the user.
+2.  **Vectorize Query**: Convert the user's question into a vector using the same embedding model.
+3.  **Vector Search**:
+    - Query ChromaDB to find the most similar document chunks (Context).
+4.  **Augmentation**:
+    - Combine the retrieved Context and the original Question into a Prompt.
+5.  **Generation**:
+    - Send the Prompt to the OpenAI LLM.
+    - Return the generated answer to the user.
+
+## 5. Setup Instructions
+
+### Prerequisites
+- Python 3.x installed.
+- Docker installed (for ChromaDB).
+- OpenAI API Key.
+
+### Installation
+1.  Create a virtual environment:
+    ```bash
+    python -m venv venv
+    source venv/bin/activate
+    ```
+2.  Install dependencies:
+    ```bash
+    pip install langchain langchain-openai chromadb pypdf2 python-dotenv
+    ```
+
+### Database Setup (ChromaDB)
+- Ensure Docker is running.
+- Run ChromaDB container:
+    ```bash
+    docker run -p 8000:8000 chromadb/chroma
+    ```
+- Configure connection in code to point to `localhost:8000` (or use persistent local path in `chromedb/`).
+
+### Configuration
+- Create a `.env` file in the root directory.
+- Add: `OPENAI_API_KEY=your_api_key_here`
+
+## 6. Coding Rules
+- **Clean Code**: Eliminate redundant code.
+- **Modularity**: Separate configuration, data loading, and logic.
+- **Comments**: Minimal comments in source code; prefer self-explanatory code.
+- **Mock Data**: Keep mock data separate from source logic.
+- **File Size**: Keep generated files small (under 250 lines).
