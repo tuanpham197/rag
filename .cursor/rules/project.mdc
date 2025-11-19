@@ -9,6 +9,7 @@ alwaysApply: true
 ## 1. Project Overview
 This project is a Retrieval-Augmented Generation (RAG) system built with Python, LangChain, and OpenAI.
 It processes PDF documents, indexes them into a Vector Database (ChromaDB), and allows users to query the information via an LLM.
+It also includes an evaluation pipeline using **Ragas** to assess the performance of the RAG system.
 
 ## 2. Directory Structure
 - `document/`: Stores input PDF files for indexing.
@@ -16,6 +17,7 @@ It processes PDF documents, indexes them into a Vector Database (ChromaDB), and 
 - `src/`: Source code.
 - `docs/`: Documentation.
 - `helper/`: Helper scripts.
+- `evaluation/`: Evaluation scripts and datasets.
 
 ## 3. Tech Stack
 - **Language**: Python
@@ -24,6 +26,7 @@ It processes PDF documents, indexes them into a Vector Database (ChromaDB), and 
 - **Vector Database**: ChromaDB (running via Docker)
 - **PDF Parsing**: PyPDF2
 - **Chunking**: RecursiveCharacterTextSplitter (LangChain)
+- **Evaluation**: Ragas
 
 ## 4. Workflow Implementation Details
 
@@ -51,6 +54,22 @@ The goal is to retrieve relevant context and answer user questions.
     - Send the Prompt to the OpenAI LLM.
     - Return the generated answer to the user.
 
+### Phase 3: Evaluation Pipeline
+The goal is to measure the quality of retrieval and generation.
+1.  **Prepare Dataset**:
+    - specific questions and corresponding ground truth answers.
+2.  **Execution**:
+    - Run the Querying Pipeline for each question.
+    - Capture: `question`, `answer`, `contexts` (retrieved chunks), and `ground_truth`.
+3.  **Metric Calculation**:
+    - Use **Ragas** to calculate metrics:
+        - **Faithfulness**: Does the answer follow from the context?
+        - **Answer Relevancy**: Is the answer relevant to the question?
+        - **Context Precision**: Are the retrieved chunks relevant?
+        - **Context Recall**: Is all necessary information retrieved?
+4.  **Export**:
+    - Save the evaluation results (including scores per question and aggregate scores) to a **CSV file**.
+
 ## 5. Setup Instructions
 
 ### Prerequisites
@@ -66,7 +85,7 @@ The goal is to retrieve relevant context and answer user questions.
     ```
 2.  Install dependencies:
     ```bash
-    pip install langchain langchain-openai chromadb pypdf2 python-dotenv
+    pip install langchain langchain-openai chromadb pypdf2 python-dotenv ragas pandas
     ```
 
 ### Database Setup (ChromaDB)
