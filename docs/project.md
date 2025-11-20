@@ -1,8 +1,3 @@
----
-description: Project rules and setup guide for RAG application
-globs: *
-alwaysApply: true
----
 
 # Project: RAG Application (Python, LangChain, OpenAI, FastAPI)
 
