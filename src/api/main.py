@@ -14,7 +14,17 @@ async def lifespan(app: FastAPI):
     yield
     # Shutdown logic if needed
 
+from fastapi.middleware.cors import CORSMiddleware
+
 app = FastAPI(title="RAG API", lifespan=lifespan)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allows all origins
+    allow_credentials=True,
+    allow_methods=["*"],  # Allows all methods
+    allow_headers=["*"],  # Allows all headers
+)
 
 @app.get("/health")
 async def health_check():

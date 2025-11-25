@@ -9,7 +9,9 @@ from dotenv import load_dotenv
 
 # load_dotenv()
 
-DATA_DIR = "data"
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.abspath(os.path.join(CURRENT_DIR, "../../"))
+DATA_DIR = os.path.join(PROJECT_ROOT, "data")
 CHROMA_DB_URL = os.getenv("CHROMA_DB_URL", "http://localhost:8001")
 COLLECTION_NAME = "rag_collection"
 
@@ -43,15 +45,19 @@ def chunk_documents(documents: List['Document']) -> List['Document']:
     về pickling (tuần tự hóa) đối tượng khi truyền qua các tiến trình.
     """
     text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size=300,
-        chunk_overlap=50,
+        chunk_size=800,
+        chunk_overlap=150,
         separators=[
-            "\n\n",   # chia theo đoạn lớn
-            "\n",     # chia theo dòng
-            ".",      # chia theo câu
-            " ",      # chia theo từ
-            ""        # fallback nếu hết cách
-        ]
+            "\n\n",      # Đoạn văn
+            "\n",        # Dòng mới
+            "●",         # Dấu đầu dòng (bullet point)
+            "○",         # Dấu đầu dòng (bullet point)
+            "\n- ",      # Dấu gạch đầu dòng
+            "\. ",       # Dấu chấm theo sau là khoảng trắng
+            " ",         # Từ
+            ""           # Ký tự
+        ],
+        keep_separator=True,
     )
     return text_splitter.split_documents(documents)
 
@@ -110,13 +116,22 @@ def index_documents(chunks: List[Document]):
         client=client,
         collection_name=COLLECTION_NAME,
         embedding_function=embeddings,
-        configuration={"hnsw": {"space": "cosine"}},
     )
     
     # Add documents
     # Chroma handles batching, but for large datasets we might want to batch manually.
     vector_store.add_documents(documents=chunks)
     print(f"Indexed {len(chunks)} chunks into ChromaDB collection '{COLLECTION_NAME}'.")
+
+def delete_collection():
+    """Deletes the ChromaDB collection."""
+    import chromadb
+    client = chromadb.HttpClient(host=os.getenv("CHROMA_HOST", "localhost"), port=int(os.getenv("CHROMA_PORT", "8001")))
+    try:
+        client.delete_collection(COLLECTION_NAME)
+        print(f"Deleted collection '{COLLECTION_NAME}'.")
+    except Exception as e:
+        print(f"Error deleting collection: {e}")
 
 if __name__ == "__main__":
     print("Starting indexing pipeline...")

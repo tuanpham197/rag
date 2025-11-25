@@ -39,14 +39,7 @@ def get_rag_chain():
     llm = ChatOllama(model="llama3")
 
     # System prompt for RAG
-    system_template = """You are an assistant for question-answering tasks. 
-Use the following pieces of retrieved context to answer the question. 
-If you don't know the answer, just say that you don't know. 
-Use three sentences maximum and keep the answer concise.
-
-Context:
-{context}
-"""
+    from src.core.prompt.system_prompt import system_template
     
     # We need to handle chat history. 
     # For simplicity in this phase, we'll just use the question and context.
@@ -78,6 +71,7 @@ Context:
     
     def retrieve_docs(input_dict):
         question = input_dict["question"]
+        print(question)
         return vector_store.similarity_search(question, k=5)
 
     chain = (
